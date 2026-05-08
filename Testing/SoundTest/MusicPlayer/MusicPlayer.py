@@ -6,8 +6,8 @@ screen = pygame.display.set_mode(screenSize)
 pygame.display.set_caption("뮤직플레이어")
 
 Musiclist = [
-    [r"C:\Users\master\Desktop\pygame_project\Testing\SoundTest\MusicPlayer\tetoris.png",r"C:\Users\master\Desktop\pygame_project\Testing\SoundTest\MusicPlayer\柊マグネタイト - テトリス copy.mp3"],
-    [r"C:\Users\master\Desktop\pygame_project\Testing\SoundTest\MusicPlayer\override.png",r"C:\Users\master\Desktop\pygame_project\Testing\SoundTest\MusicPlayer\override kasane teto.mp3"],
+    [r"Testing\SoundTest\MusicPlayer\tetoris.png",r"Testing\SoundTest\MusicPlayer\柊マグネタイト - テトリス copy.mp3"],
+    [r"Testing\SoundTest\MusicPlayer\override.png",r"Testing\SoundTest\MusicPlayer\override kasane teto.mp3"],
              ]
 
 __index = 0

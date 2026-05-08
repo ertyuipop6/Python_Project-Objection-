@@ -7,7 +7,7 @@ pygame.display.set_caption("이미지 테스팅")
 
 clock = pygame.time.Clock()
 
-img = pygame.image.load("C:\\Users\\master\\Desktop\\pygame_project\\Testing\\image.png").convert_alpha() # convert_alpha는 누끼 부분이 검은색으로 나오지 않도록 처리하는 것임
+img = pygame.image.load(r"Testing\imageTest\image.png").convert_alpha() # convert_alpha는 누끼 부분이 검은색으로 나오지 않도록 처리하는 것임
 
 running = True
 

@@ -12,21 +12,21 @@ bg_speed = 5
 font = pygame.font.SysFont("malgungothic",40,True)
 big_font = pygame.font.SysFont("malgungothic", 60, True)
 
-bgimage = pygame.image.load(r"C:\Users\master\Desktop\pygame_project\Testing\TestGames\JumpGame\Background.png")
+bgimage = pygame.image.load(r"Testing\TestGames\JumpGame\Background.png")
 bgimage = pygame.transform.scale(bgimage, screenSize)
 
 img_speed = 0.4 # 작을수록 느림
 frame_index = 0
 img_list = []
 for i in range(8):
-    img = pygame.image.load(f"Testing\\TestGames\\JumpGame\\TetoFrames\\frame_{i}_delay-0.06s.gif")
+    img = pygame.image.load(rf"TetoFrames\frame_{i}_delay-0.06s.gif")
     img = pygame.transform.rotozoom(img, 0, 0.5) 
     img_list.append(img)
 
-pear_img = pygame.image.load(r"C:\Users\master\Desktop\pygame_project\Testing\TestGames\JumpGame\image.png")
+pear_img = pygame.image.load(r"Testing\TestGames\JumpGame\image.png")
 pear_img = pygame.transform.scale(pear_img, (60,100))
 
-jump_s = pygame.mixer.Sound(r"C:\Users\master\Desktop\pygame_project\Testing\TestGames\JumpGame\teto-wav.mp3")
+jump_s = pygame.mixer.Sound(r"Testing\TestGames\JumpGame\teto-wav.mp3")
 jump_s.set_volume(0.1)
 
 plr = img_list[0].get_rect()

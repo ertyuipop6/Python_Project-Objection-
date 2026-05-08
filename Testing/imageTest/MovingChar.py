@@ -8,7 +8,7 @@ pygame.display.set_caption("움직이는 이미지")
 clock = pygame.time.Clock()
 
 # 양쪽 방향 이미지 준비
-img_left = pygame.image.load(r"C:\\Users\\master\\Desktop\\pygame_project\\Testing\\imageTest\\image.png").convert_alpha() 
+img_left = pygame.image.load(r"Testing\imageTest\image.png").convert_alpha() 
 
 #rotozoom을 써서 각도는 0, 크기 비율은 0.5(절반)로 조절
 img_left = pygame.transform.rotozoom(img_left, 0,0.5)

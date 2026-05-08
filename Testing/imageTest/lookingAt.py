@@ -10,7 +10,7 @@ pygame.display.set_caption("이동하는 방향 쳐다봄")
 clock = pygame.time.Clock()
 
 # 양쪽 방향의 이미지를 미리 준비함
-img_left = pygame.image.load("C:\\Users\\master\\Desktop\\pygame_project\\Testing\\imageTest\\image2.png").convert_alpha()
+img_left = pygame.image.load(r"Testing\imageTest\image2.png").convert_alpha()
 
 img_right = pygame.transform.flip(img_left,True,False)
 
