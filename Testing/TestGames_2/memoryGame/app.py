@@ -25,6 +25,12 @@ class Game:
         self.secondCard = None # 두 번째로 뒤집은 카드
         self.matched_count = 0 
         
+        self.IsChecking = False
+        self.difer = False
+        self.diferTick = 0
+        self.diferDelay = 0.7
+        self.flipTick = 0
+        self.flipDelay = 0.5
         self.limit_t = 30
         self.start_tick = 0
         
@@ -55,6 +61,9 @@ class Game:
         self.start_tick = pygame.time.get_ticks()
         
     def check(self,xy):
+        
+        if self.difer or self.IsChecking: return
+        
         for pt in self.cardlist:
             if pt.rect.collidepoint(xy) and not pt.front:
                 pt.front = True
@@ -63,35 +72,49 @@ class Game:
                 
                 if self.firstCard is None:
                     self.firstCard = pt
+                    
+                
                 elif self.firstCard != pt:
+                    
                     self.secondCard = pt
-                    pygame.time.delay(500)
+                    self.IsChecking = True
+                    self.flipTick = pygame.time.get_ticks()
                     
                     if self.firstCard.number == self.secondCard.number:
                         self.matched_count += 1
                     else:
+                        self.difer, self.diferTick = True, pygame.time.get_ticks()
                         screen.fill("red")
+                return
+
+
                         
-                        for pt in self.cardlist:
-                            pt.draw()
-                        
-                        pygame.display.update()
-                        pygame.time.delay(200)
-                        
-                        self.firstCard.front = False
-                        self.secondCard.front = False
-                        
-                    self.firstCard = None
-                    self.secondCard = None
     def draw(self, surface):
-        surface.fill("white")
+
+        if self.difer:
+            surface.fill("red")
+            if (pygame.time.get_ticks() - self.diferTick) / 1000 > self.diferDelay:
+                self.firstCard.front = False
+                self.secondCard.front = False
+                for pt in self.cardlist:
+                    pt.draw()
+                self.difer = False
+        else:
+            surface.fill("white")
+        
+        if self.IsChecking and (pygame.time.get_ticks() - self.flipTick) / 1000 > self.flipDelay:
+            if not self.difer:
+                self.firstCard = None
+                self.secondCard = None
+                self.IsChecking = False
+            
         r_time = self.limit_t-((pygame.time.get_ticks() - self.start_tick) // 1000)
         
         if r_time < 0:
             r_time = 0
         
         
-        timer_t = font.render(f"time : {r_time}",True,"white" if r_time > 5 else "red")
+        timer_t = font.render(f"time : {r_time}",True,"black" if r_time > 5 else "red")
         screen.blit(timer_t, (600, 50))
         
         for card in self.cardlist:
