@@ -9,12 +9,12 @@ pygame.display.set_caption("운석 피하기")
 
 clock = pygame.time.Clock()
 
-bg_img = pygame.image.load(r"C:\Users\master\Desktop\pygame_project\Testing\TestGames\meteo\Background.png")
+bg_img = pygame.image.load(r"Testing\TestGames\meteo\Background.png")
 bg_img = pygame.transform.scale(bg_img,screenSize)
 
 teto_right = []
 for i in range(8):
-    img = pygame.image.load(f"Testing\\TestGames\\meteo\\TetoFrames\\frame_{i}_delay-0.06s.gif")
+    img = pygame.image.load(rf"Testing\TestGames\meteo\TetoFrames\frame_{i}_delay-0.06s.gif")
     img = pygame.transform.rotozoom(img, 0, 0.5) # 이미지 크기를 절반으로 부드럽게 줄임
     teto_right.append(img)
 
@@ -53,7 +53,7 @@ while running:
                 stop = False
                 teto_image = teto_left
                 teto_speed = -10
-            elif event.key == pygame.K_d:
+            if event.key == pygame.K_d:
                 stop = False
                 teto_image = teto_right
                 teto_speed = 10
