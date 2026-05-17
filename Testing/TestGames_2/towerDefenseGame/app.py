@@ -2,14 +2,12 @@ import pygame
 import math
 import random
 
-# 1. 초기화 및 기본 설정
 pygame.init()
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("전략 타워 디펜스")
+pygame.display.set_caption("타워 디펜스")
 clock = pygame.time.Clock()
 
-# 색상 및 게임 규칙 설정
 WHITE = (255, 255, 255)
 BLACK = (30, 30, 30)
 RED = (255, 80, 80)
@@ -18,14 +16,11 @@ YELLOW = (255, 220, 0)
 TOWER_COST = 0
 KILL_REWARD = 15
 
-# 몬스터가 이동할 경로 (Start -> Goal)
+
 PATH = [(50, 550), (150, 550), (150, 450), (250, 450), (250, 150), 
         (150, 150), (150, 50), (450, 50), (450, 550), (750, 550), 
         (750, 450), (550, 450), (550, 250), (650, 250), (650, 50), (750, 50)]
 
-# ==========================================
-# 2. 클래스 정의
-# ==========================================
 
 class Enemy:
     def __init__(self, wave_level):
@@ -57,21 +52,20 @@ class Bullet:
         self.x, self.y = x, y
         self.target = target
         self.speed = 10
-        self.active = True # 총알의 활성화 상태
+        self.active = True
 
     def update(self, enemies):
-        # 타겟이 사라졌는지 확인 (다른 타워가 먼저 처치했을 경우)
+        
         if self.target not in enemies:
             self.active = False
             return
 
-        # 타겟을 향해 유도탄처럼 이동
         dist = math.hypot(self.target.x - self.x, self.target.y - self.y)
         if dist > self.speed:
             self.x += (self.target.x - self.x) / dist * self.speed
             self.y += (self.target.y - self.y) / dist * self.speed
         else:
-            self.target.hp -= 10 # 명중 시 데미지
+            self.target.hp -= 10
             self.active = False
 
     def draw(self):
@@ -80,26 +74,23 @@ class Bullet:
 class Tower:
     def __init__(self, x, y):
         self.x, self.y = x, y
-        self.range = 10000
+        self.range = 150
         self.cooldown = 0
 
     def update(self, enemies):
         if self.cooldown > 0:
             self.cooldown -= 1
         else:
-            # 사정거리 내에 있는 적을 찾아 발사
+
             for e in enemies:
                 if math.hypot(e.x - self.x, e.y - self.y) <= self.range:
-                    self.cooldown = 3 # 발사 후 대기 시간(쿨다운)
+                    self.cooldown = 3 
                     return Bullet(self.x, self.y, e)
         return None
 
     def draw(self):
         pygame.draw.rect(screen, YELLOW, (self.x - 20, self.y - 20, 40, 40))
 
-# ==========================================
-# 3. 게임 시스템 변수 및 메인 루프
-# ==========================================
 enemies, towers, bullets = [], [], []
 castle_hp, gold, score, wave = 10, 100, 0, 1
 spawned_in_wave, timer = 0, 0
@@ -108,13 +99,13 @@ font = pygame.font.SysFont("arial", 22, bold=True)
 running = True
 while running:
     screen.fill(BLACK)
-    # 회색 길 그리기
+
     if len(PATH) > 1: pygame.draw.lines(screen, (50, 50, 50), False, PATH, 40)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # 바둑판 눈금 정렬 (그리드 스냅)
+  
             mx, my = pygame.mouse.get_pos()
             grid_x, grid_y = (mx // 40) * 40 + 20, (my // 40) * 40 + 20
 
@@ -122,19 +113,19 @@ while running:
                 towers.append(Tower(grid_x, grid_y))
                 gold -= TOWER_COST
 
-    # --- 웨이브 및 적 생성 로직 ---
+
     timer += 1
     if spawned_in_wave < wave * 5:
-        if timer >= 60: # 1초(60프레임)마다 생성
+        if timer >= 60:
             enemies.append(Enemy(wave))
             spawned_in_wave += 1
             timer = 0
     elif len(enemies) == 0:
         wave += 1
         spawned_in_wave = 0
-        gold += 50 # 웨이브 클리어 보너스
+        gold += 50 
 
-    # --- 객체 업데이트 및 그리기 ---
+  
     for t in towers:
         t.draw()
         new_bullet = t.update(enemies)
@@ -143,20 +134,19 @@ while running:
     for b in bullets[:]:
         b.update(enemies)
         b.draw()
-        if not b.active: bullets.remove(b) # 명중했거나 타겟이 사라진 총알 제거
-
+        if not b.active: bullets.remove(b) 
     for e in enemies[:]:
-        if e.update(): # 기지 도착 시
+        if e.update(): 
             castle_hp -= 1
             enemies.remove(e)
-        elif e.hp <= 0: # 처치 시
+        elif e.hp <= 0: 
             gold += KILL_REWARD
             score += 100
             enemies.remove(e)
         else:
             e.draw()
 
-    # --- UI 표시 ---
+  
     info = font.render(f"WAVE: {wave} | GOLD: {gold} | HP: {castle_hp} | SCORE: {score}", True, WHITE)
     screen.blit(info, (20, 10))
 
@@ -164,7 +154,7 @@ while running:
         game_over_txt = font.render("GAME OVER", True, RED)
         screen.blit(game_over_txt, (WIDTH//2 - 60, HEIGHT//2))
         pygame.display.flip()
-        pygame.time.delay(3000) # 3초 대기 후 종료
+        pygame.time.delay(3000)
         running = False
 
     pygame.display.flip()

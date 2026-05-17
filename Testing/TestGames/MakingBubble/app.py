@@ -23,17 +23,16 @@ class Ball:
         self.x += self.dx
         self.y += self.dy
 
-        # 벽 충돌 체크 (튕기기)
         if self.x - self.radius < 0 or self.x + self.radius > width:
             self.dx *= -1 
         if self.y - self.radius < 0 or self.y + self.radius > height:
             self.dy *= -1 
             
     def draw(self, screen):
-        # 3. 그리기 행동
+
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
 
-# --- [메인 실행부] ---
+
 pygame.init()
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
