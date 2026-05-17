@@ -19,7 +19,7 @@ img_speed = 0.4 # 작을수록 느림
 frame_index = 0
 img_list = []
 for i in range(8):
-    img = pygame.image.load(rf"TetoFrames\frame_{i}_delay-0.06s.gif")
+    img = pygame.image.load(rf"Testing\TestGames\JumpGame\TetoFrames\frame_{i}_delay-0.06s.gif")
     img = pygame.transform.rotozoom(img, 0, 0.5) 
     img_list.append(img)
 
