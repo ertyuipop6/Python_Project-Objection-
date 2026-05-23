@@ -70,6 +70,7 @@ while running:
         if event.type == SPAWNPIPE:
             create_pipe()
     
+    
     screen.fill("skyblue")
     
     bird_speed += gravity
