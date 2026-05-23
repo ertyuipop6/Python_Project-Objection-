@@ -1,54 +1,58 @@
 import pygame
 import pygame_gui
-import GUI
+import GameData
+import GameResource
+
 
 pygame.init()
-ScreenSize = (1600,900)
-screen = pygame.display.set_mode(ScreenSize)
-pygame.display.set_caption("역전재판")
-clock = pygame.time.Clock()
 
-font = pygame.font.SysFont("malgun gothic", 20)
-# bg = pygame.Surface(ScreenSize)
-# bg.fill(pygame.Color('#000000'))
+## 공유 데이터 초기화 부분임
+GameResource.ScreenSize = (1600,900)
+GameResource.Screen = pygame.display.set_mode(GameResource.ScreenSize)
+GameResource.Clock = pygame.time.Clock()
+GameResource.Font_1 = pygame.font.SysFont("malgun gothic", 20)
+GameResource.UIManager = pygame_gui.UIManager(GameResource.ScreenSize,theme_path=r"Scripts\theme.json")
+GameResource.Running = True
+GameResource.Title = "역전 재판"
 
-manager = pygame_gui.UIManager(ScreenSize)
+pygame.display.set_caption(GameResource.Title)
+    
+# ChatFrame = GUI.TextLabel(
+#     manager=GameResource.UIManager,
+#     text="동현아 맞을래",
+#     pos=(0, 600),
+#     size=(1600, 290),
+#     bg_color=(0, 0, 0),
+#     alpha=50,
+#     layer=1,
+#     font_size=6.5,
+#     font_color="#FFFFFF",
+#     font_name="malgun gothic",
+#     align_horiz="left",    
+#     align_vert="top"    
+# )
 
-ChatFrame = GUI.TextLabel(
-    manager=manager,
-    text="동현아 맞을래",
-    pos=(0, 600),
-    size=(1600, 290),
-    bg_color=(0, 0, 0),
-    alpha=50,
-    layer=1,
-    font_size=6.5,
-    font_color="#FFFFFF",
-    font_name="malgun gothic",
-    align_horiz="left",    
-    align_vert="top"    
-)
+GameController = GameData.GameController()
 
-
-running  = True
-while running:
-    DeltaTime = clock.tick(60) / 1000.0
-    screen.fill("white")
+while GameResource.Running:
+    DeltaTime = GameResource.Clock.tick(60) / 1000.0
+    GameResource.Screen.fill("white")
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            GameResource.Running = False
+        GameController.Cycle(event)
+        
+        GameResource.UIManager.process_events(event)
 
-        manager.process_events(event)
-
-    manager.update(DeltaTime)
+    GameResource.UIManager.update(DeltaTime)
 
     m_x, m_y = pygame.mouse.get_pos()
-    DebuggingMouseSet = font.render(f"MousePos : X({m_x}) , Y({m_y})",True, "black")
+    DebuggingMouseSet = GameResource.Font_1.render(f"MousePos : X({m_x}) , Y({m_y})",True, "black")
 
-    screen.blit(DebuggingMouseSet, (m_x, m_y-20))
+    GameResource.Screen.blit(DebuggingMouseSet, (m_x, m_y-20))
     
-    manager.draw_ui(screen)
+    GameResource.UIManager.draw_ui(GameResource.Screen)
 
     pygame.display.update()
     
