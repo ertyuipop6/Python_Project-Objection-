@@ -316,34 +316,61 @@ class ImageButton(Button):
         self,
         manager,
         pos,
-        normal_image,  
+        normal_image,  # ★ 필수 인자이므로 None 기본값을 제거했습니다.
         hovered_image=None,  
         selected_image=None,  
-        size=None,  #
+        size=None,  
         layer=1,
-        object_id = None,
-        Parent= None,
+        object_id=None,
+        Parent=None,
     ):
         if size is None:
             final_size = normal_image.get_size()
         else:
             final_size = size
 
+        # 1. 🏗️ 부모 클래스(Button) 생성자 호출
+        # 이 과정에서 self.Frame(알파 0 투명 패널)과 self.button(UIButton)이 자동 생성됩니다.
         super().__init__(
-            manager=manager, pos=pos, size=final_size, text="", layer=layer, object_id=object_id, Parent=Parent
+            manager=manager, pos=pos, size=final_size, text="", layer=layer+1, object_id=object_id, Parent=Parent
         )
 
-        self.button.normal_images = normal_image
-        self.button.set_image(normal_image)
-        
-        
+        # 상태별 파이게임 Surface 이미지들을 저장해둡니다.
+        self.normal_surface = normal_image
+        self.hovered_surface = hovered_image if hovered_image else normal_image
+        self.selected_surface = selected_image if selected_image else normal_image
 
-        if hovered_image:
-            self.button.hovered_images = hovered_image
+        # 2. 🖼️ [핵심] 버튼 내부(self.Frame.panel)에 실제 이미지를 그릴 ImageLabel을 배치합니다.
+        # UIButton과 같은 부모 패널을 공유하므로 좌표는 (0, 0)입니다.
+        self.image_label = ImageLabel(
+            manager=manager,
+            image_surface=self.normal_surface,
+            pos=(0, 0),
+            size=final_size,
+            layer=layer, # UIButton과 동일하거나 한 층 아래에 배치
+            Parent=self.Frame.panel, # Button이 만든 베이스 패널을 부모로 지정
+            object_id=object_id
+        )
+        self.image_label.panel.disable()
+        self.image_label.image_element.disable()
+        # 3. 👻 버튼을 투명인간으로 만들기
+        # UIButton의 복잡한 이미지 시스템을 쓰는 대신, 배경과 테두리를 투명하게 날려서 
+        # 밑에 깔린 ImageLabel이 그대로 투과되어 보이게 만듭니다.
+        self.button.colours['normal_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['normal_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.rebuild()
+
+    def update_status_image(self, current_state):
+        """버튼의 상태(호버, 클릭 등)에 따라 밑에 깔린 ImageLabel을 교체해주는 함수"""
+        if current_state == "hovered":
+            self.image_label.set_image(self.hovered_surface)
+        elif current_state == "selected":
+            self.image_label.set_image(self.selected_surface)
         else:
-            self.button.hovered_images = normal_image
-        
-        if selected_image:
-            self.button.selected_images = selected_image
-        else:
-            self.button.selected_images = normal_image
+            self.image_label.set_image(self.normal_surface)

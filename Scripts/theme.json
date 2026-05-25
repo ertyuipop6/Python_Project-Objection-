@@ -1,0 +1,31 @@
+{
+    "defaults": {
+        "misc": {
+            "border_width": "0",
+            "shadow_width": "0"
+        },
+        "colours": {
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "active_border": "#00000000",
+            "selected_border": "#00000000",
+            "disabled_border": "#00000000"
+        }
+    },
+    "button": {
+        "misc": { "border_width": "0", "shadow_width": "0" },
+        "colours": { "normal_border": "#00000000", "hovered_border": "#00000000", "active_border": "#00000000", "selected_border": "#00000000" }
+    },
+    "text_box": {
+        "misc": { "border_width": "0", "shadow_width": "0" },
+        "colours": { "normal_border": "#00000000" }
+    },
+    "panel": {
+        "misc": { "border_width": "0", "shadow_width": "0" },
+        "colours": { "normal_border": "#00000000" }
+    },
+    "image": {
+        "misc": { "border_width": "0", "shadow_width": "0" },
+        "colours": { "normal_border": "#00000000" }
+    }
+}
