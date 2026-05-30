@@ -36,8 +36,10 @@ class Frame:
     def _apply_background(self):
         if self.panel:
             r, g, b = self.bg_rgb
-            
-            target_color = pygame.Color(r, g, b, self.alpha)
+            if self.alpha == 0:
+                target_color = pygame.Color(0, 0, 0, 0)
+            else:
+                target_color = pygame.Color(r, g, b, self.alpha)
             
             self.panel.background_colour = target_color
             self.panel.border_colour = pygame.Color(0, 0, 0, 0)
@@ -135,13 +137,15 @@ class ImageLabel(Frame):
         object_id = None,
         Parent = None,
     ):
-        self.original_image_surface = image_surface
+        
         
         # 1. 크기(size) 인자가 들어오지 않았다면 이미지 원본 크기를 자동으로 계산
         if size is None:
             final_size = image_surface.get_size()
         else:
             final_size = size
+        self.size = final_size
+        self.original_image_surface = pygame.transform.scale(image_surface,final_size)
 
         # 2. 계산된 크기로 부모 클래스(Frame) 생성자 호출 -> 베이스 패널 생성
         super().__init__(
@@ -157,14 +161,14 @@ class ImageLabel(Frame):
 
         # 3. 부모가 생성한 self.panel 위에 실제 pygame_gui.elements.UIImage 배치
         self.image_element = UIImage(
-            relative_rect=pygame.Rect((0, 0), self.size),  # 패널 내부 (0,0)에 꽉 차게 배치
+            relative_rect=pygame.Rect((0, 0), (self.size)),  # 패널 내부 (0,0)에 꽉 차게 배치
             image_surface=self.original_image_surface,
             manager=self.manager,
             container=self.panel,  # 부모의 패널을 컨테이너로 지정
             object_id=object_id,
         )
-
-    def set_image(self, new_image_surface, reset_size=False):
+        self.set_image(new_image_surface= self.original_image_surface,size=final_size,reset_size=True)
+    def set_image(self, new_image_surface,size = None, reset_size=False):
         """표시되는 이미지를 실시간(동적)으로 변경하는 메서드
         :param reset_size: True로 설정 시, 라벨 크기를 새 이미지 크기에 맞춥니다.
         """
@@ -173,7 +177,7 @@ class ImageLabel(Frame):
 
         if reset_size:
             # 새 이미지 크기에 맞춰 부모 패널과 이미지 엘리먼트 크기 동시 조절
-            new_size = new_image_surface.get_size()
+            new_size = new_image_surface.get_size() if size is None else self.size
             self.panel.set_dimensions(new_size)
             self.image_element.set_dimensions(new_size)
             self.size = new_size
@@ -374,3 +378,174 @@ class ImageButton(Button):
             self.image_label.set_image(self.selected_surface)
         else:
             self.image_label.set_image(self.normal_surface)
+
+class ImageTextButton(Button):
+
+    def __init__(
+        self,
+        manager,
+        pos,
+        text,
+        normal_image,  # ★ 필수 인자이므로 None 기본값을 제거했습니다.
+        hovered_image=None,  
+        selected_image=None,  
+        size=None,  
+        layer=1,
+        font_size=4,  
+        font_color="#FFFFFF",
+        font_name="malgun gothic",
+        align_horiz="center",  
+        align_vert="center", 
+        object_id=None,
+        Parent=None,
+    ):
+        if size is None:
+            final_size = normal_image.get_size()
+        else:
+            final_size = size
+
+        # 1. 🏗️ 부모 클래스(Button) 생성자 호출
+        # 이 과정에서 self.Frame(알파 0 투명 패널)과 self.button(UIButton)이 자동 생성됩니다.
+        super().__init__(
+            manager=manager, pos=pos, size=final_size, text="", layer=layer+1, object_id=object_id, Parent=Parent
+        )
+
+        # 상태별 파이게임 Surface 이미지들을 저장해둡니다.
+        self.normal_surface = normal_image
+        self.hovered_surface = hovered_image if hovered_image else normal_image
+        self.selected_surface = selected_image if selected_image else normal_image
+
+        # 2. 🖼️ [핵심] 버튼 내부(self.Frame.panel)에 실제 이미지를 그릴 ImageLabel을 배치합니다.
+        # UIButton과 같은 부모 패널을 공유하므로 좌표는 (0, 0)입니다.
+        self.image_label = ImageLabel(
+            manager=manager,
+            image_surface=self.normal_surface,
+            pos=(0, 0),
+            size=final_size,
+            layer=layer, # UIButton과 동일하거나 한 층 아래에 배치
+            Parent=self.Frame.panel, # Button이 만든 베이스 패널을 부모로 지정
+            object_id=object_id
+        )
+        self.image_label.panel.disable()
+        self.image_label.image_element.disable()
+        # 3. 👻 버튼을 투명인간으로 만들기
+        # UIButton의 복잡한 이미지 시스템을 쓰는 대신, 배경과 테두리를 투명하게 날려서 
+        # 밑에 깔린 ImageLabel이 그대로 투과되어 보이게 만듭니다.
+        self.button.colours['normal_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['normal_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.rebuild()
+
+    def update_status_image(self, current_state):
+        """버튼의 상태(호버, 클릭 등)에 따라 밑에 깔린 ImageLabel을 교체해주는 함수"""
+        if current_state == "hovered":
+            self.image_label.set_image(self.hovered_surface)
+        elif current_state == "selected":
+            self.image_label.set_image(self.selected_surface)
+        else:
+            self.image_label.set_image(self.normal_surface)
+
+class ImageAndTextButton(Button):
+
+    def __init__(
+        self,
+        manager,
+        pos,
+        normal_image,          # 필수 배경 이미지
+        text,                  # 버튼 위에 표시할 텍스트
+        hovered_image=None,  
+        selected_image=None,  
+        size=None,  
+        layer=1,
+        font_size=4,  
+        font_color="#FFFFFF",
+        font_name="malgun gothic",
+        align_horiz="center",  
+        align_vert="center", 
+        object_id=None,
+        Parent=None,
+    ):
+        # 1. 크기 결정
+        if size is None:
+            final_size = normal_image.get_size()
+        else:
+            final_size = size
+
+        # 2. 🏗️ 부모 클래스(Button) 생성자 호출
+        # 이 과정에서 self.Frame(알파 0 투명 패널)과 self.button(UIButton)이 최상단 레이어(layer+2)로 자동 생성됩니다.
+        super().__init__(
+            manager=manager, 
+            pos=pos, 
+            size=final_size, 
+            text="", 
+            layer=layer + 2,   # 🌟 버튼을 제일 위로 올려 마우스 입력을 독점합니다.
+            object_id=object_id, 
+            Parent=Parent
+        )
+
+        # 이미지 스택 저장
+        self.normal_surface = normal_image
+        self.hovered_surface = hovered_image if hovered_image else normal_image
+        self.selected_surface = selected_image if selected_image else normal_image
+
+        # 3. 🖼️ [1층 배치] 배경 이미지 레이블
+        self.image_label = ImageLabel(
+            manager=manager,
+            image_surface=self.normal_surface,
+            pos=(0, 0),
+            size=final_size,
+            layer=layer,       # 가장 아래층
+            Parent=self.Frame.panel,
+            object_id=object_id
+        )
+        self.image_label.panel.disable()
+        self.image_label.image_element.disable()
+
+        # 4. 🔤 [2층 배치] 텍스트 레이블 (제공해주신 TextLabel 그대로 활용)
+        self.label_component = TextLabel(
+            manager=manager,
+            text=text,
+            pos=(0, 0),
+            size=final_size,
+            bg_color=(0, 0, 0), 
+            alpha=0,           # 🌟 텍스트 박스의 프레임 패널을 완벽히 투명하게 처리해 이미지 투과
+            layer=layer + 1,   # 이미지보다 한 층 위, 버튼보다 한 층 아래
+            font_size=font_size,
+            font_color=font_color,
+            font_name=font_name,
+            align_horiz=align_horiz,
+            align_vert=align_vert,
+            object_id=object_id,
+            Parent=self.Frame.panel
+        )
+        self.label_component.label.disable()
+        self.label_component.panel.disable()
+
+        # 5. 👻 [3층 처리] 최상단 버튼을 투명인간으로 만들어 아래 이미지와 글자가 보이게끔 가공
+        self.button.colours['normal_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_bg'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['normal_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['hovered_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['active_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.colours['selected_border'] = pygame.Color(0, 0, 0, 0)
+        self.button.rebuild()
+
+    def update_status_image(self, current_state):
+        """버튼의 마우스 이벤트 상태에 따라 밑에 깔린 이미지만 교체"""
+        if current_state == "hovered":
+            self.image_label.set_image(self.hovered_surface)
+        elif current_state == "selected":
+            self.image_label.set_image(self.selected_surface)
+        else:
+            self.image_label.set_image(self.normal_surface)
+
+    def change_text(self, new_text) -> None:
+        """동적으로 글자를 바꿀 수 있는 포팅 메서드"""
+        self.label_component.set_text(new_text)

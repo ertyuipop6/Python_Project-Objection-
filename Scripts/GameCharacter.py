@@ -29,7 +29,7 @@ class Character():
         self.Image.panel.show()
     def Hide(self):
         self.Image.panel.hide()
-        
+
     def Idle(self):
         if  ((time := pygame.time.get_ticks()) - self.AnimationTick)/1000 > self.AnimationReloadTime:
             self.AnimationTick = time

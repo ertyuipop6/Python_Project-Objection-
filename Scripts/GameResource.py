@@ -11,6 +11,7 @@ Running = None
 Title = None
 GameController = None
 GameTextJsonData = None
+GameParts = None
 
 def ChangeColorToInt(string):
     string : str = string
